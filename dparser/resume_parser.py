@@ -135,7 +135,6 @@ if __name__ == '__main__':
 
     resumes = []
     data = []
-    print('hello')
     for root, directories, filenames in os.walk('files/pdf'):
         print(root, directories, filenames)
         for filename in filenames:
