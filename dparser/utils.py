@@ -369,9 +369,10 @@ def extract_mobile_number(text, custom_regex=None):
     #     [2-9][02-9]1|[2-9][02-9]{2})\s*(?:[.-]\s*)?([0-9]{7})
     #     (?:\s*(?:#|x\.?|ext\.?|
     #     extension)\s*(\d+))?'''
+
     if not custom_regex:
-        mob_num_regex = r'''(\d{3}[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)
-                        [-\.\s]*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})'''
+        mob_num_regex = r'''(\(?\d{3}\)?[-\.\s]??\d{3}[-\.\s]??\d{4}|\(\d{3}\)
+                                [-\.\s]*\d{3}[-\.\s]??\d{4}|\d{3}[-\.\s]??\d{4})'''
         phone = re.findall(re.compile(mob_num_regex), text)
     else:
         phone = re.findall(re.compile(custom_regex), text)
@@ -496,13 +497,15 @@ def extract_experience(resume_text):
 
 def extract_linkedin(text):
     """
-    Helper function to extract linkedin from text
+    Helper function to extract LinkedIn URL from text
 
     :param text: plain text extracted from resumes file
     """
-    linkedin = re.findall(r'([\s]+linkedin.com[^\s]+)', text)
+    # Regular expression to match LinkedIn URLs
+    linkedin_regex = r'(https?://[a-zA-Z0-9.-]+linkedin.com/in/[^ \s]+)'
+
+    linkedin = re.findall(linkedin_regex, text)
     if linkedin:
-        try:
-            return linkedin[0][0]
-        except IndexError:
-            return None
+        return linkedin[0]
+    else:
+        return None
