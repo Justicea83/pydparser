@@ -217,6 +217,12 @@ def extract_entity_sections_grad(text):
     return entities
 
 
+def extract_tags_with_custom_model(custom_nlp_text):
+    tags = {}
+    print('printing data here \n')
+    print(custom_nlp_text)
+
+
 def extract_entities_wih_custom_model(custom_nlp_text):
     """
     Helper function to extract different entities with custom

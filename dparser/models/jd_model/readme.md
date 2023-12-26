@@ -1,0 +1,1 @@
+python -m spacy train config.cfg --output ../../../output/jd

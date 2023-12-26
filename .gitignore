@@ -2,3 +2,6 @@ dparser/files/*
 notebooks/*
 tests/*
 output/*
+output
+notebooks
+venv
