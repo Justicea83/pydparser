@@ -14,8 +14,8 @@ def get_example_chunk(data):
     nlp = spacy.load('en_core_web_sm')
     examples: list[Example] = []
     for line in data:
-        predicted = Doc(nlp.vocab, words=line['tags_skill'])
-        reference = Doc(nlp.vocab, words=line['tokens'], tags=line['pos'])
+        predicted = Doc(nlp.vocab, words=line['pos'])
+        reference = Doc(nlp.vocab, words=line['tokens'], tags=line['tags_skill'])
         example = Example(predicted, reference)
         examples.append(example)
     return examples

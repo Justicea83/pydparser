@@ -1,6 +1,8 @@
 import io
 import os
 import re
+from collections import defaultdict
+
 import nltk
 import pandas as pd
 import docx2txt
@@ -217,10 +219,79 @@ def extract_entity_sections_grad(text):
     return entities
 
 
+def remove_non_readable_chars(input_string):
+    """
+    Remove non-human-readable characters from a string.
+
+    This includes control characters like newline (\n), form feed (\x0c),
+    and other non-printable characters.
+    """
+
+    # Regular expression for non-readable characters
+    # \x00-\x1F: Control characters
+    # \x7F: Delete character
+    # Additional characters can be added as needed
+    non_readable_regex = r'[\x00-\x1F\x7F]'
+
+    # Replace non-readable characters with an empty string
+    cleaned_string = re.sub(non_readable_regex, '', input_string)
+
+    return cleaned_string
+
+
+def is_readable(word):
+    """
+    Check if a word is readable.
+    Strips out specific unwanted characters and then checks against a regular expression.
+    """
+
+    # Regular expression for allowed characters
+    allowed_chars_regex = r'^[a-zA-Z0-9\s.,;:!?\'\"-]+$'
+
+    return re.match(allowed_chars_regex, word) is not None
+
+
 def extract_tags_with_custom_model(custom_nlp_text):
-    tags = {}
-    print('printing data here \n')
-    print(custom_nlp_text)
+    entities = defaultdict(list)
+    current_entity = []
+    current_tag = ""
+
+    for token in custom_nlp_text:
+        # Remove B- or I- prefix from the tag
+        tag_type = token.tag_.split('-')[-1] if '-' in token.tag_ else token.tag_
+
+        if is_readable(token.text):
+            if token.tag_.startswith('B-'):
+                if current_entity:
+                    entities[current_tag].append(' '.join(current_entity))
+                current_tag = tag_type
+                current_entity = [token.text]
+            elif token.tag_.startswith('I-'):
+                if not current_entity:  # Start a new entity if we haven't encountered a B- tag yet
+                    current_tag = tag_type
+                if tag_type == current_tag:
+                    current_entity.append(token.text)
+                else:
+                    if current_entity:
+                        entities[current_tag].append(' '.join(current_entity))
+                        current_entity = [token.text]
+                    current_tag = tag_type
+            else:
+                if current_entity:
+                    entities[current_tag].append(' '.join(current_entity))
+                    current_entity = []
+                current_tag = ""
+        else:
+            # If the token is not readable, end the current entity (if any)
+            if current_entity:
+                entities[current_tag].append(' '.join(current_entity))
+                current_entity = []
+            current_tag = ""
+
+    if current_entity:
+        entities[current_tag].append(' '.join(current_entity))
+
+    return dict(entities)
 
 
 def extract_entities_wih_custom_model(custom_nlp_text):
@@ -387,6 +458,40 @@ def extract_mobile_number(text, custom_regex=None):
         return number
 
 
+def clean_skills(skills):
+    skillset = []
+    for skill in skills:
+        skill = remove_non_readable_chars(skill.strip())
+        if len(skill) > 0:
+            skillset.append(skill)
+    return skillset
+
+
+def extract_skills_from_all(all_skills, noun_chunks, skills_file=None):
+    if not skills_file:
+        data = pd.read_csv(
+            os.path.join(os.path.dirname(__file__), 'skills.csv')
+        )
+    else:
+        data = pd.read_csv(skills_file)
+    skills = list(data.columns.values)
+    skillset = []
+
+    for skill in all_skills:
+        tokens = skill.lower().split()
+        for token in tokens:
+            if token.lower() in skills:
+                skillset.append(token)
+
+    # check for bi-grams and tri-grams
+    for token in noun_chunks:
+        token = token.text.lower().strip()
+        if token in skills:
+            skillset.append(token)
+
+    return [i.capitalize() for i in set([i.lower() for i in skillset])]
+
+
 def extract_skills(nlp_text, noun_chunks, skills_file=None):
     """
     Helper function to extract skills from spacy nlp text
@@ -515,3 +620,31 @@ def extract_linkedin(text):
         return linkedin[0]
     else:
         return None
+
+
+def extract_years_of_experience(text):
+    """
+    Extracts years of experience required from a text.
+    Tries to catch various formats and edge cases.
+    """
+    # Patterns to look for
+    patterns = [
+        r'(\d+)\s+years',  # Matches '5 years', '3 years' etc.
+        r'(\d+)\s*-\s*(\d+)\s+years',  # Matches '2-3 years', '3 - 5 years' etc.
+        r'minimum of\s*(\d+)',  # Matches 'minimum of 3 years' etc.
+        r'at least\s*(\d+)',  # Matches 'at least 2 years' etc.
+        r'(\d+)\s+to\s+(\d+)\s+years',  # Matches '3 to 5 years', '2 to 3 years' etc.
+        # Add more patterns as needed
+    ]
+
+    for pattern in patterns:
+        match = re.search(pattern, text, re.IGNORECASE)
+        if match:
+            # If pattern like '2-3 years' is found, return the range
+            if len(match.groups()) > 1:
+                return f"{match.group(1)} to {match.group(2)} years"
+            # Otherwise, return the single number found
+            return f"{match.group(1)} years"
+
+    # If no pattern is matched
+    return None
