@@ -136,9 +136,7 @@ if __name__ == '__main__':
     resumes = []
     data = []
     for root, directories, filenames in os.walk('files/pdf'):
-        print(root, directories, filenames)
         for filename in filenames:
-            print(filename)
             file = os.path.join(root, filename)
             resumes.append(file)
 

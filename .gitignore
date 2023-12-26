@@ -1,3 +1,4 @@
 dparser/files/*
 notebooks/*
 tests/*
+output/*
