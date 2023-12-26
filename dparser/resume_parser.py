@@ -16,7 +16,9 @@ class ResumeParser(object):
     ):
         print('Spacy model is loading...')
         nlp = spacy.load('en_core_web_sm')
-        custom_nlp = spacy.load(os.path.dirname(os.path.abspath(__file__)))
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+
+        custom_nlp = spacy.load(os.path.join(current_directory, 'models', 'res_model'))
         self.__skills_file = skills_file
         self.__custom_regex = custom_regex
         self.__matcher = Matcher(nlp.vocab)
@@ -135,7 +137,7 @@ if __name__ == '__main__':
 
     resumes = []
     data = []
-    for root, directories, filenames in os.walk('files/pdf'):
+    for root, directories, filenames in os.walk('files/res/pdf'):
         for filename in filenames:
             file = os.path.join(root, filename)
             resumes.append(file)
