@@ -1,8 +1,7 @@
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
-
-from resume_parser import ResumeParser
-from job_parser import JdParser
+from .resume_parser import ResumeParser
+from .job_parser import JdParser
 import multiprocessing as mp
 import os
 import pprint
@@ -15,10 +14,12 @@ def to_percentage(value):
 
 class MatchingEngine(object):
     def __init__(
-            self, job_description,
+            self,
+            job_description,
             resumes: list[str],
             skills_file=None,
-            custom_regex=None):
+            custom_regex=None
+    ):
         self.jd = job_description
         self.resumes = resumes
         self.parsed_jd = JdParser(job_description).get_extracted_data()
@@ -49,12 +50,9 @@ class MatchingEngine(object):
         rank = []
         for index, skills in enumerate(self.resumes_skills):
             vectorizer = TfidfVectorizer()
-
             vectors = vectorizer.fit_transform([" ".join(self.job_skills), " ".join(skills)])
             cosine_sim = cosine_similarity(vectors[0:1], vectors[1:2])
-
             score = cosine_sim[0, 0]
-
             rank.append({'name': self.parsed_resumes[index]['name'], 'score': to_percentage(score)})
         return rank
 

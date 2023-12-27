@@ -1,7 +1,11 @@
-dparser/files/*
-dparser/data
+pydparser/files/*
+pydparser/data
 notebooks/*
 tests/*
 output
 notebooks
 venv
+hidereadme.md
+build
+dist
+setup.py

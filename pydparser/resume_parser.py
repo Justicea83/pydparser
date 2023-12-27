@@ -4,7 +4,7 @@ import io
 import spacy
 import pprint
 from spacy.matcher import Matcher
-from dparser import utils
+from pydparser import utils
 
 
 class ResumeParser(object):

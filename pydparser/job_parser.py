@@ -4,7 +4,7 @@ import io
 import spacy
 import pprint
 from spacy.matcher import Matcher
-from dparser import utils
+from pydparser import utils
 
 
 class JdParser(object):
@@ -67,6 +67,7 @@ class JdParser(object):
 
         self.__details['experience'] = experience
         self.__details['skills'] = skills
+        self.__details['domain'] = cust_tags['DOMAIN']
         return
 
 
