@@ -1,7 +1,7 @@
 dparser/files/*
+dparser/data
 notebooks/*
 tests/*
-output/*
 output
 notebooks
 venv
