@@ -47,7 +47,6 @@ class MatchingEngine(object):
 
     def cosine_similarity_with_tfidf(self):
         rank = []
-
         for index, skills in enumerate(self.resumes_skills):
             vectorizer = TfidfVectorizer()
 
