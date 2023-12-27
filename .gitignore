@@ -10,3 +10,4 @@ build
 dist
 setup.py
 pydparser.egg-info
+.idea
